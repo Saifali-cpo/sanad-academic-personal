@@ -1,0 +1,915 @@
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سند الأكاديمي | المنصة الشاملة لكشف الانتحال العلمي والأصالة البحثية</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf9',
+                            100: '#ccfbf1',
+                            500: '#0d9488',
+                            600: '#0f766e',
+                            700: '#115e59',
+                            800: '#134e4a',
+                            900: '#042f2e'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Cairo', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Cairo Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Mammoth.js for docx -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <!-- PDF.js for pdf -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .highlight-src-1 { background-color: rgba(239, 68, 68, 0.25); border-bottom: 2px solid #ef4444; }
+        .highlight-src-2 { background-color: rgba(249, 115, 22, 0.25); border-bottom: 2px solid #f97316; }
+        .highlight-src-3 { background-color: rgba(234, 179, 8, 0.25); border-bottom: 2px solid #eab308; }
+        .highlight-src-4 { background-color: rgba(59, 130, 246, 0.25); border-bottom: 2px solid #3b82f6; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-sm font-medium">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-msg">تمت العملية بنجاح</span>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 gap-4">
+                
+                <!-- Logo & Brand -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('check-tab')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-700 flex items-center justify-center text-white shadow-md shadow-teal-500/20">
+                        <i class="fa-solid fa-graduation-cap text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="font-bold text-lg text-slate-900 dark:text-white leading-tight">سَنَد الأكاديمي</h1>
+                            <span class="text-[11px] font-semibold bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded-full border border-teal-200 dark:border-teal-800">نسخة شخصية 5.0</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">أداة مقارنة أكاديمية مع قاعدة المصادر التي تديرها</p>
+                    </div>
+                </div>
+
+                <!-- Fast Actions -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Sample Selector -->
+                    <select id="preset-selector" onchange="loadPresetSample()" class="text-xs bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 max-w-[150px] sm:max-w-[210px] truncate">
+                        <option value="">📂 اختر نموذج بحث جاهز للاختبار..</option>
+                        <option value="ai-ethics">دراسة: الذكاء الاصطناعي وأخلاقيات البحث (استلال متوسط 18%)</option>
+                        <option value="law">بحث: المسؤولية المدنية في العقود (استلال مرتفع 34%)</option>
+                        <option value="clean-energy">ورقة بحثية: خلايا السيليكون في الطاقة المتجددة (أصيل 4%)</option>
+                    </select>
+
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleDarkMode()" title="تبديل الوضع الليلي/النهاري" class="w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <i id="theme-icon" class="fa-solid fa-moon"></i>
+                    </button>
+
+                    <!-- Reset / New Check -->
+                    <button onclick="resetAll()" class="px-3 py-1.5 rounded-lg border border-teal-500/40 text-teal-700 dark:text-teal-300 text-xs font-semibold hover:bg-teal-50 dark:hover:bg-teal-950/50 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span class="hidden sm:inline">فحص جديد</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="flex items-center gap-1 overflow-x-auto py-1 scrollbar-none border-t border-slate-100 dark:border-slate-800/60">
+                <button id="nav-check-tab" onclick="switchTab('check-tab')" class="tab-btn px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg flex items-center gap-2 whitespace-nowrap transition text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/40 border-b-2 border-teal-600">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                    فحص النص والأبحاث
+                </button>
+                <button id="nav-report-tab" onclick="switchTab('report-tab')" class="tab-btn px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg flex items-center gap-2 whitespace-nowrap transition">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    تقرير الاستلال والتحليل المفصل
+                    <span id="report-badge" class="hidden text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.2 rounded-full">جاهز</span>
+                </button>
+                <button id="nav-sources-tab" onclick="switchTab('sources-tab')" class="tab-btn px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg flex items-center gap-2 whitespace-nowrap transition">
+                    <i class="fa-solid fa-database"></i>
+                    قاعدة مصادر المقارنة
+                    <span class="text-[10px] bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-300">OpenAlex + محلي</span>
+                </button>
+                <button id="nav-paraphrase-tab" onclick="switchTab('paraphrase-tab')" class="tab-btn px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg flex items-center gap-2 whitespace-nowrap transition">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    مساعد إعادة الصياغة والتوثيق
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Public access notice -->
+    <section class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 no-print">
+      <div class="rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-3 text-xs leading-6 text-amber-900 dark:text-amber-200">
+        <strong>تنبيه خصوصية:</strong> الموقع متاح لأي شخص يملك الرابط. لا ترفع أبحاثاً سرية أو بيانات شخصية. نص الفحص يُرسل إلى الخادم للمعالجة ولا يُحفظ كسجل فحوصات.
+      </div>
+    </section>
+
+    <!-- Main Body Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ==================== TAB 1: SCANNER & INPUT ==================== -->
+        <section id="check-tab" class="space-y-6">
+
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 text-white p-6 sm:p-8 shadow-xl border border-teal-900/50">
+                <div class="relative z-10 max-w-3xl space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                        <span class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
+                        محرك مقارنة N-Gram مع مصادر مرجعية محلية
+                    </div>
+                    <h2 class="text-xl sm:text-3xl font-extrabold tracking-tight">فحص الأمانة العلمية وكشف الاستلال للبحوث والرسائل</h2>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        قارن نصك مع ملفات الأبحاث والمراجع التي تضيفها إلى قاعدة بيانات الموقع. النتائج توضح مواضع التشابه مع هذه المجموعة فقط، ولا تمثل فحصاً شاملاً للإنترنت أو بديلاً عن Turnitin و iThenticate.
+                    </p>
+                </div>
+                <div class="absolute -left-10 -bottom-10 w-48 h-48 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            </div>
+
+            <!-- Upload & Input Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/80 p-5 sm:p-6 space-y-5">
+                
+                <!-- Action Bar above Textarea -->
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold text-slate-700 dark:text-slate-200">محتوى البحث المراد فحصه</span>
+                        <span class="text-[11px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded">عربي / EN</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="fillSampleQuick()" class="text-xs px-2.5 py-1.5 rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 hover:bg-teal-100 transition font-medium flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-lines"></i>
+                            تعبئة نص تجريبي
+                        </button>
+                        <button onclick="clearText()" class="text-xs px-2.5 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-300 hover:bg-rose-100 transition font-medium flex items-center gap-1.5">
+                            <i class="fa-solid fa-trash-can"></i>
+                            مسح النص
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Textarea -->
+                <div class="relative">
+                    <textarea id="search-text" rows="7" oninput="updateStats()" placeholder="الصق نص البحث أو المقال أو الفصل الأكاديمي هنا.. (الحد الأدنى 40 كلمة لتحقيق دقة إحصائية موثوقة).. أو يمكنك استخدام النماذج الجاهزة أعلاه أو رفع ملف." class="w-full text-sm leading-relaxed p-4 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"></textarea>
+                </div>
+
+                <!-- Dropzone for File Upload -->
+                <div id="drop-zone" onclick="triggerFileInput()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" class="cursor-pointer border-2 border-dashed border-teal-300 dark:border-teal-700/60 hover:border-teal-500 dark:hover:border-teal-400 bg-teal-50/30 dark:bg-teal-950/20 hover:bg-teal-50/70 dark:hover:bg-teal-950/40 rounded-xl p-5 text-center transition flex flex-col items-center justify-center gap-2">
+                    <input type="file" id="file-input" accept=".txt,.docx,.pdf" class="hidden" onchange="handleFileSelect(event)">
+                    <div class="w-11 h-11 rounded-full bg-teal-100 dark:bg-teal-900/60 text-teal-600 dark:text-teal-400 flex items-center justify-center text-lg shadow-sm">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-teal-800 dark:text-teal-300">
+                            اضغط لاستعراض ملف أو اسحب وأفلت ملف بحثي
+                        </p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            يدعم ملفات: <span class="font-mono font-medium text-teal-700 dark:text-teal-300">.txt, .docx (Word), .pdf</span> (حتى 20 ميغابايت)
+                        </p>
+                    </div>
+                    <div id="file-status" class="hidden text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 mt-1 bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1 rounded-full">
+                        <i class="fa-solid fa-check"></i>
+                        <span id="file-name-display"></span>
+                    </div>
+                </div>
+
+                <!-- Live Metrics Bar -->
+                <div class="flex flex-wrap items-center justify-between text-xs text-slate-600 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-700/60 gap-3">
+                    <div class="flex items-center gap-4">
+                        <span>الكلمات: <strong id="stat-words" class="text-slate-900 dark:text-white font-bold">0</strong></span>
+                        <span>الحروف: <strong id="stat-chars" class="text-slate-900 dark:text-white font-bold">0</strong></span>
+                        <span>الجمل: <strong id="stat-sentences" class="text-slate-900 dark:text-white font-bold">0</strong></span>
+                    </div>
+                    <div>
+                        <span>وقت القراءة المقدر: <strong id="stat-reading" class="text-slate-900 dark:text-white font-bold">0</strong> دقيقة</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-violet-200 dark:border-violet-900 p-5 space-y-3">
+              <div class="flex items-center gap-2"><i class="fa-solid fa-robot text-violet-600"></i><h3 class="font-bold text-sm">تقدير احتمال النص المولّد بالذكاء الاصطناعي</h3></div>
+              <p class="text-xs text-slate-500 dark:text-slate-400">تحليل منفصل عن نسبة التشابه. لا يمكن استنتاج نسبة استخدام الذكاء الاصطناعي بدقة قطعية؛ النتيجة تقدير احتمالي وقد يخطئ، خصوصاً مع النصوص العربية المنقحة.</p>
+              <button onclick="analyzeAiText()" class="rounded-xl bg-violet-700 hover:bg-violet-800 text-white text-sm font-bold px-5 py-3 w-full"><i class="fa-solid fa-microchip ml-2"></i>تحليل احتمال النص المولّد آلياً</button>
+              <div id="ai-detection-result" class="hidden rounded-lg bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 p-4"></div>
+            </div>
+
+            <!-- Settings & Repositories Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/80 p-5 sm:p-6 space-y-6">
+                
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 pb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-teal-600 dark:text-teal-400"></i>
+                        <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base">إعدادات ومعايير الفحص الأكاديمي</h3>
+                    </div>
+                    <span class="text-xs bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-300 font-semibold px-2.5 py-1 rounded-full border border-teal-200 dark:border-teal-800">معيار جامعي</span>
+                </div>
+
+                <!-- Checkbox Criteria -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-teal-400 dark:hover:border-teal-600 bg-slate-50/50 dark:bg-slate-900/40 cursor-pointer transition">
+                        <input type="checkbox" id="opt-exclude-bib" checked class="mt-1 w-4 h-4 text-teal-600 rounded focus:ring-teal-500 border-slate-300 dark:border-slate-600">
+                        <div>
+                            <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 block">استثناء قائمة المراجع والمصادر</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight block mt-0.5">تجاهل فقرات الببليوغرافيا وقوائم المصادر الختامية تلقائياً.</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-teal-400 dark:hover:border-teal-600 bg-slate-50/50 dark:bg-slate-900/40 cursor-pointer transition">
+                        <input type="checkbox" id="opt-exclude-quotes" checked class="mt-1 w-4 h-4 text-teal-600 rounded focus:ring-teal-500 border-slate-300 dark:border-slate-600">
+                        <div>
+                            <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 block">استثناء الاقتباسات المنصصة</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight block mt-0.5">استثناء النصوص الواقعة بين علامات تنصيص &quot;...&quot; أو &laquo;...&raquo;.</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-teal-400 dark:hover:border-teal-600 bg-slate-50/50 dark:bg-slate-900/40 cursor-pointer transition">
+                        <input type="checkbox" id="opt-paraphrase" checked class="mt-1 w-4 h-4 text-teal-600 rounded focus:ring-teal-500 border-slate-300 dark:border-slate-600">
+                        <div>
+                            <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 block">كشف إعادة الصياغة (Paraphrase)</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight block mt-0.5">رصد الاستبدال بالمرادفات والتغيير الطفيف للبنية اللغوية.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Word Threshold Slider -->
+                <div class="space-y-2 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700/70">
+                    <div class="flex items-center justify-between text-xs sm:text-sm">
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">الحد الأدنى لتطابق الكلمات المتتالية:</span>
+                        <span class="font-bold text-teal-600 dark:text-teal-400 bg-teal-100 dark:bg-teal-900/60 px-2 py-0.5 rounded-md"><span id="slider-val">6</span> كلمات</span>
+                    </div>
+                    <input type="range" id="ngram-slider" min="3" max="15" value="6" oninput="document.getElementById('slider-val').innerText = this.value" class="w-full accent-teal-600 cursor-pointer">
+                    <div class="flex justify-between text-[11px] text-slate-400">
+                        <span>3 كلمات (تدقيق فائق الصرامة)</span>
+                        <span>6 كلمات (المعيار الدولي الموصى به)</span>
+                        <span>15 كلمة (تطابق فقرات كاملة)</span>
+                    </div>
+                </div>
+
+                <!-- Database Repositories Selectors -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200">نطاق المطابقة والمستودعات الأكاديمية:</span>
+                        <span class="text-[11px] text-slate-400">انقر على الخانة لتفعيل أو إلغاء المستودع</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        
+                        <!-- Repo 1 -->
+                        <div onclick="toggleRepo(this)" data-active="true" class="repo-card cursor-pointer p-3.5 rounded-xl border-2 border-teal-500 bg-teal-50/50 dark:bg-teal-950/40 text-slate-800 dark:text-white transition flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-book-bookmark text-teal-600 dark:text-teal-400"></i>
+                                <span class="text-xs font-bold">المجلات العربية المحكمة</span>
+                            </div>
+                            <i class="check-icon fa-solid fa-circle-check text-teal-600 dark:text-teal-400"></i>
+                        </div>
+
+                        <!-- Repo 2 -->
+                        <div onclick="toggleRepo(this)" data-active="true" class="repo-card cursor-pointer p-3.5 rounded-xl border-2 border-teal-500 bg-teal-50/50 dark:bg-teal-950/40 text-slate-800 dark:text-white transition flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-scroll text-teal-600 dark:text-teal-400"></i>
+                                <span class="text-xs font-bold">أطروحات الماجستير والدكتوراه</span>
+                            </div>
+                            <i class="check-icon fa-solid fa-circle-check text-teal-600 dark:text-teal-400"></i>
+                        </div>
+
+                        <!-- Repo 3 -->
+                        <div onclick="toggleRepo(this)" data-active="true" class="repo-card cursor-pointer p-3.5 rounded-xl border-2 border-teal-500 bg-teal-50/50 dark:bg-teal-950/40 text-slate-800 dark:text-white transition flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-globe text-teal-600 dark:text-teal-400"></i>
+                                <span class="text-xs font-bold">مستودعات IEEE & Springer</span>
+                            </div>
+                            <i class="check-icon fa-solid fa-circle-check text-teal-600 dark:text-teal-400"></i>
+                        </div>
+
+                        <!-- Repo 4 -->
+                        <div onclick="toggleRepo(this)" data-active="true" class="repo-card cursor-pointer p-3.5 rounded-xl border-2 border-teal-500 bg-teal-50/50 dark:bg-teal-950/40 text-slate-800 dark:text-white transition flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-laptop-code text-teal-600 dark:text-teal-400"></i>
+                                <span class="text-xs font-bold">أبحاث المؤتمرات والويب</span>
+                            </div>
+                            <i class="check-icon fa-solid fa-circle-check text-teal-600 dark:text-teal-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real reference corpus management -->
+                <div class="space-y-3 rounded-xl border border-indigo-200 dark:border-indigo-900 bg-indigo-50/50 dark:bg-indigo-950/20 p-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-database text-indigo-600"></i>
+                        <h4 class="text-sm font-bold">قاعدة المصادر الفعلية الخاصة بك</h4>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">أضف أبحاثاً وملفات تملك حق استخدامها لتصبح مرجعاً تتم المقارنة معه فعلياً. لا تُرفع ملفات البحث الجاري فحصه إلى هذه القاعدة تلقائياً.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input id="admin-token" type="password" autocomplete="off" placeholder="رمز إدارة قاعدة المصادر (ADMIN_TOKEN)" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900">
+                        <input id="reference-file" type="file" accept=".txt,.docx,.pdf" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900">
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="uploadReference()" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold">إضافة الملف إلى قاعدة المصادر</button>
+                        <button type="button" onclick="refreshReferences()" class="px-3 py-2 rounded-lg border border-indigo-300 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-bold">تحديث قائمة المصادر</button>
+                    </div>
+                    <div id="reference-list" class="space-y-2 text-xs text-slate-600 dark:text-slate-300">جارٍ تحميل حالة قاعدة المصادر...</div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button id="scan-btn" onclick="startScan()" class="w-full py-4 rounded-xl bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-700 hover:from-teal-700 hover:to-emerald-800 text-white font-bold text-base shadow-lg shadow-teal-600/25 flex items-center justify-center gap-3 transition transform active:scale-[0.99]">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>بدء فحص الاستلال الأكاديمي الشامل</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- University Standard Notice -->
+            <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-xl p-4 flex items-start gap-3 text-xs sm:text-sm text-amber-800 dark:text-amber-300">
+                <i class="fa-solid fa-circle-exclamation text-base mt-0.5 text-amber-600 dark:text-amber-400"></i>
+                <div class="leading-relaxed">
+                    <strong>المعيار الجامعي المعتمد:</strong> تعتبر نسبة الاستلال آمنة ومقبولة أكاديمياً في معظم الجامعات إذا كانت أقل من <strong>20%</strong> إجمالاً، وبشرط ألا تتجاوز نسبة النقل من أي مصدر منفرد <strong>3%-5%</strong> مع ضرورة التوثيق الدقيق.
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ==================== TAB 2: DETAILED REPORT ==================== -->
+        <section id="report-tab" class="hidden space-y-6">
+
+            <!-- Report Header & Print / Export -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span id="rep-status-pill" class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
+                            تقرير مكتمل - مقبول أكاديمياً
+                        </span>
+                        <span class="text-xs text-slate-400" id="rep-date"></span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-black mt-2 text-slate-900 dark:text-white" id="rep-title">تقرير كشف الاستلال للأمانة العلمية</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">الرقم المرجعي الموثق: <span class="font-mono text-teal-600" id="rep-ref">#SND-2026-9812</span></p>
+                </div>
+
+                <div class="flex items-center gap-2 no-print">
+                    <button onclick="window.print()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 shadow transition">
+                        <i class="fa-solid fa-print"></i>
+                        طباعة / حفظ كـ PDF
+                    </button>
+                    <button onclick="switchTab('check-tab')" class="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs sm:text-sm font-medium transition">
+                        تعديل النص
+                    </button>
+                </div>
+            </div>
+
+            <!-- Score and Highlights Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Main Plagiarism Score Card -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center text-center">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">نسبة الاستلال الإجمالية</span>
+                    <div class="relative w-40 h-40 flex items-center justify-center">
+                        <canvas id="scoreChart"></canvas>
+                        <div class="absolute flex flex-col items-center justify-center">
+                            <span id="score-percentage" class="text-3xl font-black text-slate-900 dark:text-white">0%</span>
+                            <span id="score-label" class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">آمن ومقبول</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-3" id="score-subtext">النسبة وصفية للمصادر الموجودة في قاعدة الموقع ولا تحدد القبول الجامعي.</p>
+                </div>
+
+                <!-- Metric Details -->
+                <div class="md:col-span-2 grid grid-cols-2 sm:grid-cols-2 gap-4">
+                    
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-file-word"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">إجمالي الكلمات المفحوصة</span>
+                            <span id="rep-total-words" class="text-xl font-bold text-slate-900 dark:text-white">0</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-copy"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">الكلمات المطابقة (المستلة)</span>
+                            <span id="rep-plag-words" class="text-xl font-bold text-rose-600 dark:text-rose-400">0</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-quote-right"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">الاقتباسات المستثناة</span>
+                            <span id="rep-quotes-count" class="text-xl font-bold text-blue-600 dark:text-blue-400">3 نصوص</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">المصادر المتطابقة المكتشفة</span>
+                            <span id="rep-sources-count" class="text-xl font-bold text-purple-600 dark:text-purple-400">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matched Sources Breakdown -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-teal-600"></i>
+                        قائمة المصادر المطابقة مرتبة حسب نسبة التأثير
+                    </h3>
+                    <span class="text-xs text-slate-400">اضغط على المصدر لتمييزه في النص</span>
+                </div>
+
+                <div id="sources-list-container" class="space-y-3">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Highlighted Text Body -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base flex items-center gap-2">
+                        <i class="fa-solid fa-highlighter text-amber-500"></i>
+                        معاينة النص المفحوص مع التظليل اللوني للمصادر
+                    </h3>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-400/40 border-b border-red-500"></span> استلال مباشر</span>
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded bg-amber-400/40 border-b border-amber-500"></span> إعادة صياغة</span>
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded bg-blue-400/40 border-b border-blue-500"></span> اقتباس موثق</span>
+                    </div>
+                </div>
+
+                <div id="highlighted-text-content" class="text-sm leading-8 text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-900/60 p-5 rounded-xl border border-slate-200 dark:border-slate-700/60 max-h-[450px] overflow-y-auto">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ==================== TAB 3: SOURCES DATABASE ==================== -->
+        <section id="sources-tab" class="hidden space-y-6">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+                <div>
+                    <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">قواعد البيانات والمستودعات المفهرسة</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">يمكنك البحث في بيانات OpenAlex الببليوغرافية، وإجراء مقارنة نصية فعلية مع ملفات المصادر التي تضيفها إلى القاعدة المحلية.</p>
+                </div>
+
+                <!-- Search Input for Repos -->
+                <div class="relative max-w-md">
+                    <i class="fa-solid fa-search absolute right-3.5 top-3.5 text-slate-400 text-sm"></i>
+                    <input type="text" id="repo-search" oninput="filterRepos(this.value)" placeholder="ابحث عن مجلة، جامعة، أو قاعدة بيانات..." class="w-full text-xs sm:text-sm pl-4 pr-10 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+
+                <div class="rounded-xl border border-sky-200 dark:border-sky-900 bg-sky-50/50 dark:bg-sky-950/20 p-4 space-y-2">
+                    <h3 class="text-sm font-bold">اكتشاف أبحاث منشورة عبر OpenAlex</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">بحث ببليوغرافي في عناوين وبيانات الأبحاث. هذه النتائج تساعدك في العثور على مصادر محتملة، لكنها لا تثبت وجود تطابق نصي ولا تدخل في نسبة التشابه.</p>
+                    <div class="flex gap-2"><input id="discovery-query" class="flex-1 min-w-0 text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900" placeholder="أدخل عبارة أو موضوعاً بحثياً..."><button onclick="discoverWorks()" class="px-3 py-2 rounded-lg bg-sky-700 text-white text-xs font-bold">بحث</button></div>
+                    <div id="discovery-results" class="space-y-2 text-xs"></div>
+                </div>
+
+                <!-- Database Cards Grid -->
+                <div id="repos-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    
+                    <div class="repo-item p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-teal-600 bg-teal-50 dark:bg-teal-950 px-2 py-0.5 rounded">كتالوج تعريفي — غير متصل</span>
+                            <span class="text-[11px] text-slate-400">رابط خارجي</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900 dark:text-white">المستودع الرقمي للجامعات السعودية (Shuaa)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">يشمل أطروحات الماجستير والدكتوراه المودعة في أكثر من 28 جامعة حكومية وخاصة.</p>
+                    </div>
+
+                    <div class="repo-item p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-teal-600 bg-teal-50 dark:bg-teal-950 px-2 py-0.5 rounded">كتالوج تعريفي — غير متصل</span>
+                            <span class="text-[11px] text-slate-400">رابط خارجي</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900 dark:text-white">بنك المعرفة المصري (EKB Database)</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">الدوريات العلمية المحكمة والمؤتمرات الصادرة عن الجامعات والمراكز البحثية المصرية.</p>
+                    </div>
+
+                    <div class="repo-item p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-teal-600 bg-teal-50 dark:bg-teal-950 px-2 py-0.5 rounded">كتالوج تعريفي — غير متصل</span>
+                            <span class="text-[11px] text-slate-400">رابط خارجي</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900 dark:text-white">مستودعات IEEE Xplore & ACM</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">الأوراق البحثية في علوم الحاسب، الذكاء الاصطناعي، الهندسة الكهربائية والإلكترونية.</p>
+                    </div>
+
+                    <div class="repo-item p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-teal-600 bg-teal-50 dark:bg-teal-950 px-2 py-0.5 rounded">كتالوج تعريفي — غير متصل</span>
+                            <span class="text-[11px] text-slate-400">رابط خارجي</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900 dark:text-white">SpringerLink & Nature Publications</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">العلوم الأساسية، الطبية، الحيوية والإنسانيات المنشورة دولياً.</p>
+                    </div>
+
+                    <div class="repo-item p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-teal-600 bg-teal-50 dark:bg-teal-950 px-2 py-0.5 rounded">كتالوج تعريفي — غير متصل</span>
+                            <span class="text-[11px] text-slate-400">رابط خارجي</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900 dark:text-white">مجلات اتحاد الجامعات العربية</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">الدوريات العلمية الصادرة في الأردن، العراق، مصر، الجزائر، والمغرب.</p>
+                    </div>
+
+                    <div class="repo-item p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-teal-600 bg-teal-50 dark:bg-teal-950 px-2 py-0.5 rounded">كتالوج تعريفي — غير متصل</span>
+                            <span class="text-[11px] text-slate-400">رابط خارجي</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-900 dark:text-white">الأرشيف الرقمي المفتوح للويب الأكاديمي</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">فهرسة لحظية للمواقع الجامعية ومستودعات arXiv و ResearchGate المفتوحة.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 4: PARAPHRASE & CITATION ASSISTANT ==================== -->
+        <section id="paraphrase-tab" class="hidden space-y-6">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+                <div>
+                    <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">مساعد الصياغة الأكاديمية ومولد التوثيق</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">أعد صياغة الجمل ذات الاستلال المرتفع مع الحفاظ على المعنى العلمي، أو ولّد توثيقاً دقيقاً بأسلوب APA 7th أو Harvard.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Input -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300">النص الأصلي المراد معالجته:</label>
+                        <textarea id="para-input" rows="6" class="w-full text-xs sm:text-sm p-3.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="الصق هنا الفقرة التي ظهرت بنسبة استلال مرتفعة..."></textarea>
+                        <div class="flex gap-2">
+                            <button onclick="runParaphrase()" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                إعادة صياغة أكاديمية رصينة
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Output -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300">الصياغة الأكاديمية المقترحة (أصالة 100%):</label>
+                        <div id="para-output" class="min-h-[140px] text-xs sm:text-sm p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20 text-slate-800 dark:text-slate-200 leading-relaxed">
+                            ستظهر هنا الصياغة البديلة المحسنة بعد النقر على زر إعادة الصياغة..
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Citation Generator Box -->
+                <div class="pt-4 border-t border-slate-100 dark:border-slate-700/60 space-y-4">
+                    <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-bookmark text-teal-600"></i>
+                        مولد توثيق المراجع السريع
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <input type="text" id="cit-author" placeholder="اسم المؤلف (مثلاً: د. أحمد الشمري)" class="text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900">
+                        <input type="text" id="cit-title" placeholder="عنوان البحث أو الكتاب" class="text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900">
+                        <input type="text" id="cit-year" placeholder="سنة النشر (مثلاً: 2024)" class="text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900">
+                    </div>
+                    <button onclick="generateCitation()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 text-white rounded-lg text-xs font-semibold">
+                        توليد التوثيق بنظام APA 7th
+                    </button>
+                    <div id="cit-result" class="hidden p-3 rounded-lg bg-slate-100 dark:bg-slate-900 text-xs font-mono text-teal-700 dark:text-teal-300 border border-slate-200 dark:border-slate-700"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Scan Progress Modal -->
+    <div id="scan-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-700 text-center space-y-5">
+            <div class="w-16 h-16 rounded-full bg-teal-100 dark:bg-teal-950/80 text-teal-600 dark:text-teal-400 mx-auto flex items-center justify-center text-2xl animate-spin">
+                <i class="fa-solid fa-spinner"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white" id="modal-status-text">جاري فحص الاستلال الأكاديمي...</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" id="modal-sub-text">فحص الكلمات مع المجلات المحكمة والرسائل الجامعية</p>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                <div id="scan-progress-bar" class="bg-gradient-to-r from-teal-500 to-emerald-500 h-full w-0 transition-all duration-300"></div>
+            </div>
+            <div class="text-[11px] text-slate-400 flex justify-between font-mono">
+                <span id="scan-percentage-text">0%</span>
+                <span>محرك N-Gram للمصادر المحلية</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400 no-print mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p>منصة سَنَد الأكاديمي &copy; 2026 | فحص الأمانة العلمية وفق معايير اللجان الأكاديمية المعتمدة</p>
+            <div class="flex items-center gap-4 text-slate-400">
+                <span class="hover:text-teal-600 cursor-pointer">سياسة الخصوصية</span>
+                <span>•</span>
+                <span class="hover:text-teal-600 cursor-pointer">المعايير الدولية</span>
+                <span>•</span>
+                <span class="hover:text-teal-600 cursor-pointer">الدعم الفني</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+    'use strict';
+
+    const SAMPLES = {
+      'ai-ethics': `أحدث الذكاء الاصطناعي التوليدي تحولاً جذرياً في مسارات البحث العلمي والأكاديمي، حيث يوفر إمكانات هائلة لتسريع تحليل البيانات وصياغة الفرضيات العلمية ومراجعة الأدبيات السابقة. ومع ذلك، فإن الاستخدام المتزايد للنماذج اللغوية الكبيرة أثار تساؤلات ملحة حول الأمانة العلمية ونسبية المساهمة البشرية في الإنتاج المعرفي. تشير الدراسات إلى أن الاعتماد غير المنضبط على هذه التقنيات قد يؤدي إلى انتحال مقنع أو توليد مراجع وهمية لا وجود لها في الواقع. إن المؤسسات التعليمية مدعوة اليوم لوضع مواثيق أخلاقية حازمة تنظم الاستعانة بأدوات الذكاء الاصطناعي، مع إلزام الباحثين بالإفصاح الصريح عن مدى مساهمتها في إعداد المسودات البحثية.`,
+      'law': `تعتبر المسؤولية المدنية الناشئة عن الإخلال بالعقود الإلكترونية من أبرز التحديات القانونية المعاصرة التي واجهت الفقه والقضاء المقارن. ويترتب على العقد شريعة المتعاقدين التزام كل طرف بتنفيذ ما التزم به بحسن نية ووفقاً لمقتضيات العدالة والنزاهة التجارية. إذا امتنع المدين عن تنفيذ التزامه التعاقدي أو تأخر في أدائه دون مسوغ قانوني مشروع، نشأ في ذمته التزام جديد بتعويض الدائن عن الضرر المادي والمعنوي المباشر الناشئ عن ذلك الإخلال. وقد اتجه المشرع الحديث إلى إرساء قواعد خاصة لحماية المستهلك الإلكتروني من الشروط التعسفية والبنود المجحفة التي يفرضها الطرف الأقوى في العقود النموذجية غير القابلة للتفاوض.`,
+      'clean-energy': `تعد خلايا السيليكون الشمسية ذات التقاطعات غير المتجانسة (Heterojunction Solar Cells) إحدى أبرز القفزات التقنية في مجال حصاد الطاقة الكهروضوئية المتجددة خلال العقد الأخير. يتميز هذا الطراز بكفاءة تحويل طاقية تتجاوز 26.5% في البيئات المعملية مع معامل حراري منخفض يضمن استقرار الأداء عند درجات الحرارة المرتفعة. من خلال ترسيب طبقات نانوية رقيقة جداً من السيليكون غير المتبلور على رقائق السيليكون البلوري، يتحقق خفض استثنائي لمعدلات إعادة اتحاد حاملات الشحنة السطحية، مما ينعكس إيجاباً على جهد الدائرة المفتوحة (Voc) ويقلل تكلفة توليد الكيلوواط الساعي مقارنة بالتقنيات التقليدية.`
+    };
+
+    // هذه قائمة أمثلة توضيحية فقط وليست قواعد بيانات حقيقية مفهرسة.
+    const DEMO_SOURCES = [
+      { name: 'مصدر تجريبي: مجلة دراسات إسلامية وقانونية', type: 'مثال توضيحي', url: '' },
+      { name: 'مصدر تجريبي: مستودع أطروحات جامعية', type: 'مثال توضيحي', url: '' },
+      { name: 'مصدر تجريبي: أبحاث في الذكاء الاصطناعي', type: 'مثال توضيحي', url: '' },
+      { name: 'مصدر تجريبي: مؤتمر التعليم العالي', type: 'مثال توضيحي', url: '' }
+    ];
+
+    let scoreChartInstance = null;
+    let lastScanScore = 0;
+    let selectedFile = null;
+    let toastTimer = null;
+    const MAX_FILE_SIZE = 20 * 1024 * 1024;
+    const ALLOWED_EXTENSIONS = ['txt', 'docx', 'pdf'];
+
+    const $ = id => document.getElementById(id);
+    function showToast(message, type='success') {
+      const toast=$('toast'), msg=$('toast-msg'), icon=$('toast-icon');
+      if (!toast || !msg) { console[type==='error'?'error':'log'](message); return; }
+      msg.textContent=message;
+      if(icon){ icon.className=type==='error'?'fa-solid fa-circle-exclamation text-rose-400':'fa-solid fa-circle-check text-emerald-400'; }
+      toast.classList.remove('-translate-y-20','opacity-0'); toast.classList.add('translate-y-0','opacity-100');
+      clearTimeout(toastTimer); toastTimer=setTimeout(()=>{toast.classList.add('-translate-y-20','opacity-0');toast.classList.remove('translate-y-0','opacity-100');},3200);
+    }
+
+    function initTheme() {
+      let dark=false;
+      try { dark=localStorage.getItem('color-theme')==='dark' || (!localStorage.getItem('color-theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch(e) {}
+      document.documentElement.classList.toggle('dark',dark); updateThemeIcon(dark);
+    }
+    function updateThemeIcon(isDark) { const icon=$('theme-icon'); if(icon) icon.className=isDark?'fa-solid fa-sun':'fa-solid fa-moon'; }
+    function toggleDarkMode() {
+      const dark=document.documentElement.classList.toggle('dark');
+      try { localStorage.setItem('color-theme',dark?'dark':'light'); } catch(e) {}
+      updateThemeIcon(dark); if(scoreChartInstance) renderScoreChart(lastScanScore);
+    }
+
+    function switchTab(tabId) {
+      const ids=['check-tab','report-tab','sources-tab','paraphrase-tab'];
+      if(!ids.includes(tabId)) return;
+      ids.forEach(id=>{const el=$(id);if(el)el.classList.toggle('hidden',id!==tabId);});
+      document.querySelectorAll('.tab-btn').forEach(btn=>{
+        const active=btn.id==='nav-'+tabId;
+        btn.classList.toggle('text-teal-700',active); btn.classList.toggle('dark:text-teal-300',active);
+        btn.classList.toggle('bg-teal-50',active); btn.classList.toggle('dark:bg-teal-900/40',active);
+        btn.classList.toggle('border-b-2',active); btn.classList.toggle('border-teal-600',active);
+        btn.classList.toggle('font-semibold',active); btn.classList.toggle('font-medium',!active);
+      });
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function getText(){return $('search-text')?.value||'';}
+    function wordCount(text){return (text.trim().match(/[\p{L}\p{N}]+(?:['’_-][\p{L}\p{N}]+)*/gu)||[]).length;}
+    function updateStats(){
+      const text=getText(), words=wordCount(text), chars=text.length;
+      const sentences=(text.match(/[.!؟?]+/g)||[]).length;
+      if($('stat-words'))$('stat-words').textContent=words.toLocaleString('ar');
+      if($('stat-chars'))$('stat-chars').textContent=chars.toLocaleString('ar');
+      if($('stat-sentences'))$('stat-sentences').textContent=sentences.toLocaleString('ar');
+      if($('stat-reading'))$('stat-reading').textContent=(words/200).toFixed(1);
+    }
+    function clearText(){if($('search-text'))$('search-text').value='';clearSelectedFile();updateStats();showToast('تم مسح النص');}
+    function fillSampleQuick(){if($('search-text'))$('search-text').value=SAMPLES['ai-ethics'];clearSelectedFile();updateStats();showToast('تم إدراج النص التجريبي');}
+    function loadPresetSample(){const key=$('preset-selector')?.value;if(key&&SAMPLES[key]){$('search-text').value=SAMPLES[key];clearSelectedFile();updateStats();showToast('تم تحميل النموذج التجريبي');}}
+    function resetAll(){clearText();if($('preset-selector'))$('preset-selector').value='';document.querySelectorAll('.repo-card').forEach(card=>setRepoState(card,true));switchTab('check-tab');showToast('تم تجهيز فحص جديد');}
+
+    function triggerFileInput(){const input=$('file-input');if(input){input.value='';input.click();}}
+    function handleDragOver(event){event.preventDefault();$('drop-zone')?.classList.add('border-teal-600','bg-teal-100/70');}
+    function handleDragLeave(event){event.preventDefault();$('drop-zone')?.classList.remove('border-teal-600','bg-teal-100/70');}
+    function handleDrop(event){event.preventDefault();handleDragLeave(event);const files=event.dataTransfer?.files;if(files?.length)processFile(files[0]);}
+    function handleFileSelect(event){const file=event.target?.files?.[0];if(file)processFile(file);}
+    function clearSelectedFile(){selectedFile=null;const status=$('file-status');if(status)status.classList.add('hidden');const input=$('file-input');if(input)input.value='';}
+    function setFileStatus(name){const status=$('file-status'),label=$('file-name-display');if(label)label.textContent=name;if(status)status.classList.remove('hidden');}
+    async function processFile(file){
+      if(!file)return;
+      const ext=(file.name.split('.').pop()||'').toLowerCase();
+      if(!ALLOWED_EXTENSIONS.includes(ext)){showToast('نوع الملف غير مدعوم. استخدم TXT أو DOCX أو PDF.', 'error');return;}
+      if(file.size>MAX_FILE_SIZE){showToast('حجم الملف أكبر من 20 ميغابايت.', 'error');return;}
+      if(file.size===0){showToast('الملف فارغ.', 'error');return;}
+      try{
+        let text='';
+        if(ext==='txt') text=await readTextFile(file);
+        else if(ext==='docx') text=await readDocxFile(file);
+        else text=await readPdfFile(file);
+        text=(text||'').replace(/\u0000/g,'').trim();
+        if(!text){throw new Error('لم يتم العثور على نص قابل للاستخراج. قد يكون PDF ممسوحاً ضوئياً ويحتاج OCR.');}
+        $('search-text').value=text;selectedFile=file;setFileStatus(file.name);updateStats();
+        showToast(`تم استخراج النص من ${file.name}`);
+      }catch(error){console.error('File import error:',error);showToast(error.message||'تعذرت قراءة الملف. تحقق من سلامته ثم حاول مجدداً.','error');}
+    }
+    function readTextFile(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(new Error('تعذرت قراءة الملف النصي.'));reader.readAsText(file);});}
+    async function readDocxFile(file){
+      if(!window.mammoth)throw new Error('مكتبة قراءة Word لم تُحمّل. تحقق من اتصال الإنترنت ثم أعد تحميل الصفحة.');
+      const buffer=await file.arrayBuffer();const result=await mammoth.extractRawText({arrayBuffer:buffer});
+      if(result.messages?.length)console.warn('DOCX extraction notes:',result.messages);
+      return result.value||'';
+    }
+    async function readPdfFile(file){
+      if(!window.pdfjsLib)throw new Error('مكتبة PDF لم تُحمّل. تحقق من اتصال الإنترنت ثم أعد تحميل الصفحة.');
+      const buffer=await file.arrayBuffer();
+      const pdf=await pdfjsLib.getDocument({data:new Uint8Array(buffer)}).promise;let pages=[];
+      for(let i=1;i<=pdf.numPages;i++){
+        const page=await pdf.getPage(i);const content=await page.getTextContent();
+        pages.push(content.items.map(item=>item.str).join(' '));
+      }
+      return pages.join('\n\n');
+    }
+
+    function setRepoState(card,active){
+      card.dataset.active=String(active);
+      card.classList.toggle('border-teal-500',active);card.classList.toggle('bg-teal-50/50',active);card.classList.toggle('dark:bg-teal-950/40',active);
+      card.classList.toggle('border-slate-200',!active);card.classList.toggle('dark:border-slate-700',!active);
+      const icon=card.querySelector('.check-icon');if(icon){icon.classList.toggle('hidden',!active);}
+      card.setAttribute('aria-pressed',String(active));
+    }
+    function toggleRepo(card){if(!card)return;setRepoState(card,card.dataset.active!=='true');}
+    function filterRepos(query){const q=(query||'').trim().toLocaleLowerCase();document.querySelectorAll('.repo-item').forEach(item=>{item.classList.toggle('hidden',!item.textContent.toLocaleLowerCase().includes(q));});}
+
+    function normalizeText(text){
+      return text.toLocaleLowerCase('ar').normalize('NFKC')
+        .replace(/[ًٌٍَُِّْـ]/g,'').replace(/[إأآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي')
+        .replace(/[“”"'«»()[\]{}،؛,:.!؟?\-–—_/\\]+/g,' ').replace(/\s+/g,' ').trim();
+    }
+    function stripExcluded(text){
+      let result=text;
+      if($('opt-exclude-quotes')?.checked){result=result.replace(/"[^"]*"|“[^”]*”|«[^»]*»|\([^)]{1,500}\)/g,' ');}
+      if($('opt-exclude-bib')?.checked){
+        const patterns=[/^\s*(?:قائمة المراجع|المراجع|المصادر|references|bibliography)\s*[:：]?\s*$/im];
+        for(const re of patterns){const match=re.exec(result);if(match)result=result.slice(0,match.index);}
+      }
+      return result;
+    }
+    function buildNgrams(words,n){const map=new Map();for(let i=0;i<=words.length-n;i++){const gram=words.slice(i,i+n).join(' ');if(!map.has(gram))map.set(gram,[]);map.get(gram).push(i);}return map;}
+    function analyzeLocally(text){
+      // هذا فحص تشابه داخلي بين أجزاء النص نفسه، وليس بحثاً في الإنترنت أو قواعد بيانات خارجية.
+      const cleaned=stripExcluded(text), words=normalizeText(cleaned).split(' ').filter(Boolean);
+      const n=Math.max(3,Math.min(15,Number($('ngram-slider')?.value||6)));
+      if(words.length<n)return {score:0,matched:0,total:words.length,sources:[],html:escapeHtml(text),note:'النص أقصر من الحد المختار للمقاطع.'};
+      const grams=buildNgrams(words,n);let repeated=0;const duplicatePositions=new Set();
+      for(const positions of grams.values())if(positions.length>1){for(const pos of positions.slice(1)){for(let k=0;k<n;k++)duplicatePositions.add(pos+k);}}
+      repeated=duplicatePositions.size;const score=Math.min(100,Math.round((repeated/Math.max(1,words.length))*100));
+      const sources=repeated?[{name:'مقاطع مكررة داخل النص المدخل',type:'تشابه داخلي فقط',weight:score,url:''}]:[];
+      return {score,matched:repeated,total:words.length,sources,html:renderRepeatedWords(words,duplicatePositions),note:'لا تتم مقارنة هذا النص بمصادر خارجية.'};
+    }
+    function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    function renderRepeatedWords(words,positions){return words.map((word,i)=>positions.has(i)?`<mark class="highlight-src-1 rounded px-0.5">${escapeHtml(word)}</mark>`:escapeHtml(word)).join(' ');}
+
+    async function startScan(){
+      const text=getText().trim();
+      if(!text){showToast('أدخل نص البحث أو ارفع ملفاً أولاً.','error');return;}
+      if(wordCount(text)<10){showToast('أدخل 10 كلمات على الأقل.','error');return;}
+      const modal=$('scan-modal'),bar=$('scan-progress-bar'),pct=$('scan-percentage-text'),status=$('modal-status-text'),sub=$('modal-sub-text'),btn=$('scan-btn');
+      if(modal)modal.classList.remove('hidden');if(btn)btn.disabled=true;
+      if(status)status.textContent='جارٍ مقارنة النص مع قاعدة المصادر الفعلية...';
+      if(sub)sub.textContent='يتم إرسال النص إلى خادم الموقع لمعالجته ومقارنته بالمراجع التي أضفتها';
+      if(bar)bar.style.width='25%';if(pct)pct.textContent='25%';
+      try{
+        const response=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,ngram:Number($('ngram-slider')?.value||6),excludeQuotes:$('opt-exclude-quotes')?.checked,excludeBibliography:$('opt-exclude-bib')?.checked})});
+        const data=await response.json();if(!response.ok)throw new Error(data.error||'فشل الفحص على الخادم.');
+        if(bar)bar.style.width='100%';if(pct)pct.textContent='100%';
+        const result={score:data.similarity,matched:data.matchedWords,total:data.totalWords,sources:data.sources.map(x=>({name:x.name,type:`تطابق مع قاعدة المصادر — ${x.matchedWords} كلمة`,weight:x.similarity,url:'',snippets:x.snippets})),note:data.disclaimer,method:data.method};
+        setTimeout(()=>{if(modal)modal.classList.add('hidden');if(btn)btn.disabled=false;renderReport(result,text);switchTab('report-tab');},250);
+      }catch(error){console.error(error);if(modal)modal.classList.add('hidden');if(btn)btn.disabled=false;showToast(error.message||'تعذر الاتصال بخادم الفحص. شغّل الخادم أولاً.','error');}
+    }
+
+    async function uploadReference(){
+      const file=$('reference-file')?.files?.[0],token=$('admin-token')?.value.trim();
+      if(!file){showToast('اختر ملفاً لإضافته إلى قاعدة المصادر.','error');return;}
+      if(!token){showToast('أدخل رمز إدارة قاعدة المصادر.','error');return;}
+      const form=new FormData();form.append('file',file);
+      try{const r=await fetch('/api/references',{method:'POST',headers:{'x-admin-token':token},body:form});const d=await r.json();if(!r.ok)throw new Error(d.error||'فشل رفع المصدر.');showToast(d.message);$('reference-file').value='';await refreshReferences();}
+      catch(e){showToast(e.message,'error');}
+    }
+    async function refreshReferences(){
+      const box=$('reference-list');if(!box)return;box.textContent='جارٍ تحميل المصادر...';
+      try{const r=await fetch('/api/references');const d=await r.json();box.textContent='';
+        if(!d.references.length){box.textContent='قاعدة المصادر فارغة حالياً. أضف ملفات مرجعية لبدء المقارنة الفعلية.';return;}
+        d.references.forEach(ref=>{const row=document.createElement('div');row.className='flex items-center justify-between gap-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2';const label=document.createElement('span');label.textContent=`${ref.name} — ${ref.words.toLocaleString('ar')} كلمة`;row.append(label);const del=document.createElement('button');del.type='button';del.textContent='حذف';del.className='text-rose-600 font-bold';del.onclick=()=>deleteReference(ref.id);row.append(del);box.append(row);});
+      }catch(e){box.textContent='تعذر الاتصال بالخادم. افتح الموقع من خلال Node.js وليس بفتح ملف HTML مباشرة.';}
+    }
+    async function deleteReference(id){const token=$('admin-token')?.value.trim();if(!token){showToast('أدخل رمز الإدارة أولاً.','error');return;}if(!confirm('هل تريد حذف هذا المصدر من قاعدة المقارنة؟'))return;try{const r=await fetch('/api/references/'+encodeURIComponent(id),{method:'DELETE',headers:{'x-admin-token':token}});const d=await r.json();if(!r.ok)throw new Error(d.error);showToast(d.message);refreshReferences();}catch(e){showToast(e.message,'error');}}
+    async function discoverWorks(){
+      const q=$('discovery-query')?.value.trim(),box=$('discovery-results');if(!q){showToast('اكتب موضوع البحث أولاً.','error');return;}box.textContent='جارٍ البحث في OpenAlex...';
+      try{const r=await fetch('/api/discover?q='+encodeURIComponent(q));const d=await r.json();if(!r.ok)throw new Error(d.error);box.textContent='';if(!d.results.length){box.textContent='لم تظهر نتائج.';return;}d.results.forEach(item=>{const card=document.createElement('div');card.className='rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3';const title=document.createElement('a');title.textContent=item.title||'عنوان غير متاح';title.href=item.url||'#';title.target='_blank';title.rel='noopener noreferrer';title.className='font-bold text-sky-700 dark:text-sky-300';const meta=document.createElement('p');meta.className='text-slate-500 mt-1';meta.textContent=[item.year,(item.authors||[]).join('، '),item.doi].filter(Boolean).join(' • ');card.append(title,meta);box.append(card);});}
+      catch(e){box.textContent=e.message;}
+    }
+
+    function renderReport(result,originalText){
+      lastScanScore=result.score;
+      if($('rep-date'))$('rep-date').textContent=new Date().toLocaleString('ar-IQ');
+      if($('rep-ref'))$('rep-ref').textContent='#LOCAL-'+Date.now().toString().slice(-8);
+      if($('rep-title'))$('rep-title').textContent='تقرير مقارنة النص مع قاعدة المصادر';
+      if($('score-percentage'))$('score-percentage').textContent=result.score+'%';
+      if($('score-label'))$('score-label').textContent='تشابه مع القاعدة المحلية';
+      if($('score-subtext'))$('score-subtext').textContent=result.note;
+      if($('rep-total-words'))$('rep-total-words').textContent=result.total.toLocaleString('ar');
+      if($('rep-plag-words'))$('rep-plag-words').textContent=result.matched.toLocaleString('ar');
+      if($('rep-quotes-count'))$('rep-quotes-count').textContent='غير محتسب';
+      if($('rep-sources-count'))$('rep-sources-count').textContent=result.sources.length;
+      if($('rep-status-pill')){$('rep-status-pill').textContent='نتيجة مقارنة قاعدة محلية - ليست شهادة جامعية';$('rep-status-pill').className='text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300';}
+      if($('highlighted-text-content'))$('highlighted-text-content').innerHTML=`<p class="mb-3 text-xs text-amber-700 dark:text-amber-300">${escapeHtml(result.note||'')} النسبة محسوبة مقابل قاعدة المصادر التي أضافها مدير الموقع فقط.</p><div dir="auto">${escapeHtml(originalText)}</div>`;
+      const list=$('sources-list-container');if(list){list.innerHTML='';if(!result.sources.length)list.innerHTML='<p class="text-sm text-slate-500">لم تُكتشف مقاطع متكررة وفق حجم N-Gram المحدد.</p>';else result.sources.forEach(src=>{const item=document.createElement('div');item.className='p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2';const title=document.createElement('strong');title.className='block text-sm';title.textContent=src.name;const detail=document.createElement('span');detail.className='block text-xs text-slate-500';detail.textContent=src.type+' — نسبة التطابق مع هذا المصدر '+src.weight+'%';item.append(title,detail);(src.snippets||[]).forEach(sn=>{const excerpt=document.createElement('p');excerpt.className='rounded-lg bg-amber-50 dark:bg-amber-950/30 p-2 text-xs leading-6';excerpt.textContent='مقطع مطابق: '+sn.excerpt;item.append(excerpt);});list.append(item);});}
+      if($('report-badge'))$('report-badge').classList.remove('hidden');renderScoreChart(result.score);
+    }
+    function renderScoreChart(score){
+      const canvas=$('scoreChart');if(!canvas||!window.Chart)return;
+      if(scoreChartInstance)scoreChartInstance.destroy();
+      const dark=document.documentElement.classList.contains('dark');
+      scoreChartInstance=new Chart(canvas,{type:'doughnut',data:{labels:['تكرار داخلي','باقي النص'],datasets:[{data:[score,100-score],backgroundColor:['#f97316',dark?'#334155':'#e2e8f0'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'78%',plugins:{legend:{display:false},tooltip:{enabled:true}}}});
+    }
+
+    function runParaphrase(){
+      const text=$('para-input')?.value.trim();if(!text){showToast('أدخل الفقرة أولاً.','error');return;}
+      const output=$('para-output');if(!output)return;
+      output.textContent='هذه الأداة لا تستخدم نموذجاً لغوياً لإنتاج إعادة صياغة حقيقية. يمكنها فقط مساعدتك على مراجعة النص؛ أعد كتابة الفكرة بأسلوبك وأضف توثيق المصدر الأصلي عند الاقتباس.';
+      showToast('تم عرض إرشادات المراجعة الأكاديمية.');
+    }
+    function generateCitation(){
+      const author=$('cit-author')?.value.trim(),title=$('cit-title')?.value.trim(),year=$('cit-year')?.value.trim();
+      if(!author||!title||!year){showToast('أكمل اسم المؤلف والعنوان وسنة النشر.','error');return;}
+      const result=$('cit-result');if(!result)return;
+      result.textContent=`${author}. (${year}). ${title}.`;
+      result.classList.remove('hidden');
+    }
+
+
+
+    async function analyzeAiText(){
+      const text=$('search-text').value.trim(),box=$('ai-detection-result');
+      if(text.length<500){showToast('أدخل 500 حرف على الأقل لتحليل النص.','error');return;}
+      box.classList.remove('hidden');box.textContent='جارٍ تحليل النص...';
+      try{
+        const r=await fetch('/api/ai-detection',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+        const d=await r.json();if(!r.ok)throw new Error(d.error||'تعذر التحليل.');
+        box.innerHTML=`<div class="flex items-center justify-between gap-3"><strong>احتمال أن النص مولّد آلياً</strong><strong class="text-2xl text-violet-700">${Number(d.aiLikelihood).toFixed(1)}%</strong></div><div class="h-2 rounded-full bg-violet-100 dark:bg-violet-900 mt-3 overflow-hidden"><div class="h-full bg-violet-600" style="width:${Math.max(0,Math.min(100,d.aiLikelihood))}%"></div></div><p class="text-xs mt-3 text-slate-600 dark:text-slate-300">النموذج: ${escapeHtml(d.model)} · عدد الكلمات: ${d.wordCount}</p><p class="text-xs mt-2 text-amber-700 dark:text-amber-300">${escapeHtml(d.warning)}</p>`;
+      }catch(e){box.textContent=e.message;showToast(e.message,'error');}
+    }
+
+    // اربط الأحداث بعد اكتمال تحميل DOM، مع توافق مع النقر والسحب على الهواتف.
+    document.addEventListener('DOMContentLoaded',()=>{
+      initTheme();updateStats();refreshReferences();
+      const drop=$('drop-zone');if(drop){drop.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();triggerFileInput();}});drop.setAttribute('role','button');drop.setAttribute('tabindex','0');}
+      const slider=$('ngram-slider');if(slider)slider.addEventListener('input',()=>{if($('slider-val'))$('slider-val').textContent=slider.value;});
+      const text=$('search-text');if(text)text.addEventListener('input',updateStats);
+      // منع فتح مربع اختيار الملف مرتين عند النقر على مساحة الرفع.
+      if(drop)drop.addEventListener('click',e=>{if(e.target.closest('input'))return;});
+    });
+    </script>
+</body>
+</html>
