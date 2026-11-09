@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: sanad-academic-personal
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: DATA_DIR
+        value: ./data
